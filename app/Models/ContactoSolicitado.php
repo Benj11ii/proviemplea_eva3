@@ -21,6 +21,8 @@ class ContactoSolicitado extends Model
 {
     use HasFactory, HasUuids;
 
+    protected $table = 'contactos_solicitados'; 
+    
     public $incrementing = false;
     protected $keyType = 'string';
 
