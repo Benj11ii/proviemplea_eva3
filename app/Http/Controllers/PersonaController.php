@@ -22,9 +22,12 @@ class PersonaController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Listado exitoso (Cached)",
-     *         @OA\Header(header="X-RateLimit-Limit", ref="#/components/headers/RateLimitLimit"),
-     *         @OA\Header(header="Cache-Control", ref="#/components/headers/CacheControlMaxAge"),
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/PersonaCVCiego"))
+     *         @OA\Header(header="X-RateLimit-Limit", description="Límite de peticiones por minuto", @OA\Schema(type="integer", example=60)),
+     *         @OA\Header(header="Cache-Control", description="Control de caché", @OA\Schema(type="string", example="max-age=600, private")),
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/PersonaCVCiego")
+     *         )
      *     )
      * )
      */

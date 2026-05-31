@@ -203,6 +203,7 @@
                     "Personas"
                 ],
                 "summary": "Listar personas (CV ciego)",
+                "description": "Obtiene los perfiles en caché por 10 minutos. Retorna cabeceras Rate-Limit y Cache-Control.",
                 "operationId": "getPersonas",
                 "parameters": [
                     {
@@ -216,7 +217,23 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Listado exitoso",
+                        "description": "Listado exitoso (Cached)",
+                        "headers": {
+                            "X-RateLimit-Limit": {
+                                "description": "Límite de peticiones por minuto",
+                                "schema": {
+                                    "type": "integer",
+                                    "example": 60
+                                }
+                            },
+                            "Cache-Control": {
+                                "description": "Control de caché",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "max-age=600, private"
+                                }
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {

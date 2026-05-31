@@ -1,0 +1,419 @@
+openapi: 3.0.0
+info:
+  title: 'ProviEmplea API'
+  description: 'API REST para la plataforma de empleo ProviEmplea de Providencia. Permite gestionar talentos, empresas y procesos de selección con curriculum ciego.'
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080/api'
+    description: 'Servidor de desarrollo local'
+paths:
+  /empresas:
+    get:
+      tags:
+        - Empresas
+      summary: 'Listar empresas'
+      operationId: getEmpresas
+      responses:
+        200:
+          description: 'Listado exitoso'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Empresa'
+    post:
+      tags:
+        - Empresas
+      summary: 'Registrar nueva empresa'
+      operationId: createEmpresa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpresaInput'
+      responses:
+        201:
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empresa'
+  '/empresas/{id}':
+    get:
+      tags:
+        - Empresas
+      summary: 'Obtener empresa por ID'
+      operationId: getEmpresa
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Encontrado
+    put:
+      tags:
+        - Empresas
+      summary: 'Actualizar empresa'
+      operationId: updateEmpresa
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpresaInput'
+      responses:
+        200:
+          description: Actualizado
+    delete:
+      tags:
+        - Empresas
+      summary: 'Desactivar empresa'
+      operationId: deleteEmpresa
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Desactivada
+  '/empresas/{id}/validar':
+    patch:
+      tags:
+        - Empresas
+      summary: 'Validar empresa'
+      operationId: validarEmpresa
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Validado
+  /health:
+    get:
+      tags:
+        - Health
+      summary: 'Verificar estado del servicio'
+      operationId: healthCheck
+      responses:
+        200:
+          description: 'Servicio operativo'
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: online
+                service: 'ProviEmplea API'
+                version: 1.0.0
+  /personas:
+    get:
+      tags:
+        - Personas
+      summary: 'Listar personas (CV ciego)'
+      description: 'Obtiene los perfiles en caché por 10 minutos. Retorna cabeceras Rate-Limit y Cache-Control.'
+      operationId: getPersonas
+      parameters:
+        -
+          name: validado
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: 'Listado exitoso (Cached)'
+          headers:
+            X-RateLimit-Limit:
+              description: 'Límite de peticiones por minuto'
+              schema:
+                type: integer
+                example: 60
+            Cache-Control:
+              description: 'Control de caché'
+              schema:
+                type: string
+                example: 'max-age=600, private'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonaCVCiego'
+    post:
+      tags:
+        - Personas
+      summary: 'Registrar nueva persona/talento'
+      operationId: createPersona
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonaInput'
+      responses:
+        201:
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Persona'
+        422:
+          description: 'Error de validación'
+  '/personas/{id}':
+    get:
+      tags:
+        - Personas
+      summary: 'Obtener perfil completo por ID'
+      operationId: getPersona
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Persona'
+        404:
+          description: 'No encontrado'
+    put:
+      tags:
+        - Personas
+      summary: 'Actualizar perfil'
+      operationId: updatePersona
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonaInput'
+      responses:
+        200:
+          description: Actualizado
+    delete:
+      tags:
+        - Personas
+      summary: 'Desactivar perfil'
+      operationId: deletePersona
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Desactivado
+  '/personas/{id}/validar':
+    patch:
+      tags:
+        - Personas
+      summary: 'Validar talento'
+      operationId: validarPersona
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Validado
+components:
+  schemas:
+    ContactoSolicitado:
+      title: 'Contacto Solicitado'
+      properties:
+        id:
+          type: string
+          format: uuid
+        empresa_id:
+          type: string
+          format: uuid
+        persona_id:
+          type: string
+          format: uuid
+        estado:
+          type: string
+          enum:
+            - pendiente
+            - contactado
+            - entrevista
+            - seleccionado
+            - no-seleccionado
+            - proceso-cerrado
+      type: object
+    ContactoSolicitadoInput:
+      title: 'Contacto Solicitado Input'
+      required:
+        - empresa_id
+        - persona_id
+      properties:
+        empresa_id:
+          type: string
+          format: uuid
+        persona_id:
+          type: string
+          format: uuid
+      type: object
+    Empresa:
+      title: Empresa
+      required:
+        - nombre_empresa
+        - rut_empresa
+        - email
+        - tipo_empresa
+        - contacto_nombre
+        - contacto_email
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre_empresa:
+          type: string
+          example: 'TechCorp SpA'
+        rut_empresa:
+          type: string
+          example: 76123456-7
+        email:
+          type: string
+          format: email
+        tipo_empresa:
+          type: string
+          enum:
+            - contratacion-directa
+            - est
+            - outsourcing
+      type: object
+    EmpresaInput:
+      title: 'Empresa Input'
+      required:
+        - nombre_empresa
+        - rut_empresa
+        - email
+        - tipo_empresa
+      properties:
+        nombre_empresa:
+          type: string
+        rut_empresa:
+          type: string
+        email:
+          type: string
+          format: email
+        tipo_empresa:
+          type: string
+          enum:
+            - contratacion-directa
+            - est
+            - outsourcing
+      type: object
+    Persona:
+      title: Persona
+      required:
+        - email
+        - codigo_talento
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: talento@providencia.cl
+        codigo_talento:
+          type: string
+          example: PROV-2026-A1B2
+        resumen:
+          type: string
+          example: 'Desarrollador fullstack junior.'
+        nivel_educacional:
+          type: string
+          enum:
+            - basica
+            - media
+            - tecnica
+            - universitaria
+            - postgrado
+      type: object
+    PersonaInput:
+      title: 'Persona Input'
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: talento@providencia.cl
+        telefono:
+          type: string
+          example: '+56912345678'
+        nivel_educacional:
+          type: string
+          enum:
+            - basica
+            - media
+            - tecnica
+            - universitaria
+            - postgrado
+      type: object
+    PersonaCVCiego:
+      title: 'Persona CV Ciego'
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo_talento:
+          type: string
+        resumen:
+          type: string
+      type: object
+tags:
+  - name: Health
+    description: 'Endpoints de salud del sistema'
+  - name: Personas
+    description: 'Gestión de perfiles de talentos/vecinos'
+  - name: Empresas
+    description: 'Gestión de empresas empleadoras'
