@@ -1,4 +1,5 @@
-# 📡 ProviEmplea API — Plataforma de Búsqueda Inversa
+# ProviEmplea API — Plataforma de Búsqueda Inversa
+> **Enlace al repositorio oficial:** [https://github.com/Benj11ii/proviemplea_eva3](https://github.com/Benj11ii/proviemplea_eva3)
 
 **Proyecto de Vinculación con el Medio (VcM)**  
 **Asignatura:** Desarrollo Backend (IF201IINF) — Unidad 3  
@@ -8,7 +9,7 @@ API REST robusta construida en **Laravel 11 (PHP 8.4)** y dockerizada bajo Nginx
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Componente       | Versión                    |
 |------------------|----------------------------|
@@ -20,7 +21,7 @@ API REST robusta construida en **Laravel 11 (PHP 8.4)** y dockerizada bajo Nginx
 
 ---
 
-## 🚀 Requisitos e Instalación Local
+## Requisitos e Instalación Local
 
 ### Requisitos previos
 
@@ -54,11 +55,11 @@ docker compose exec app php artisan migrate:fresh
 
 ---
 
-## 📖 Documentación Interactiva (Swagger UI)
+## Documentación Interactiva (Swagger UI)
 
 Con el entorno corriendo, accede a la especificación interactiva en:
 
-👉 **http://localhost:8080/api/documentation**
+ **http://localhost:8080/api/documentation**
 
 ### Endpoints disponibles
 
@@ -74,6 +75,6 @@ Con el entorno corriendo, accede a la especificación interactiva en:
 
 ---
 
-## 📝 Contrato de Datos
+## Contrato de Datos
 
 El archivo de especificación OpenAPI oficial en formato YAML se encuentra en la raíz del proyecto como **`swagger.yaml`**.
