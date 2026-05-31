@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: proviemplea_app
+    volumes:
+      - .:/var/www
+    networks:
+      - proviemplea_network
+    depends_on:
+      - db
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: proviemplea_web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - proviemplea_network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: proviemplea_db
+    environment:
+      MYSQL_DATABASE: proviemplea
+      MYSQL_USER: proviemplea_user
+      MYSQL_PASSWORD: proviemplea_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - proviemplea_network
+
+networks:
+  proviemplea_network:
+    driver: bridge
+
+volumes:
+  dbdata:
