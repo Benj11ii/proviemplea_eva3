@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Persona;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache; // Se importa Facade de Cache
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -16,24 +17,32 @@ class PersonaController extends Controller
      *     operationId="getPersonas",
      *     tags={"Personas"},
      *     summary="Listar personas (CV ciego)",
+     *     description="Obtiene los perfiles en caché por 10 minutos. Retorna cabeceras Rate-Limit y Cache-Control.",
      *     @OA\Parameter(name="validado", in="query", required=false, @OA\Schema(type="boolean")),
      *     @OA\Response(
      *         response=200,
-     *         description="Listado exitoso",
-     *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(ref="#/components/schemas/PersonaCVCiego")
-     *         )
+     *         description="Listado exitoso (Cached)",
+     *         @OA\Header(header="X-RateLimit-Limit", ref="#/components/headers/RateLimitLimit"),
+     *         @OA\Header(header="Cache-Control", ref="#/components/headers/CacheControlMaxAge"),
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/PersonaCVCiego"))
      *     )
      * )
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Persona::where('activo', true);
-        if ($request->has('validado')) {
-            $query->where('validado', $request->boolean('validado'));
-        }
-        return $this->successResponse($query->get()->map(fn($p) => $p->getCvCiego()));
+        $validado = $request->has('validado') ? $request->boolean('validado') : null;
+        $cacheKey = 'personas_cv_ciego_' . ($validado ?? 'all');
+
+        // Almacenar en caché por 10 minutos (600 segundos)
+        $personas = Cache::remember($cacheKey, 600, function () use ($validado) {
+            $query = Persona::where('activo', true);
+            if ($validado !== null) {
+                $query->where('validado', $validado);
+            }
+            return $query->get()->map(fn($p) => $p->getCvCiego())->toArray();
+        });
+
+        return $this->successResponse($personas);
     }
 
     /**
@@ -63,7 +72,12 @@ class PersonaController extends Controller
         $data['codigo_talento'] = 'PROV-2026-' . strtoupper(Str::random(4));
         $data['porcentaje_completitud'] = 50;
 
-        return $this->successResponse(Persona::create($data), 201);
+        $persona = Persona::create($data);
+
+        // Limpiar la caché de consultas al insertar un nuevo registro para evitar datos desactualizados
+        $this->limpiarCachePersonas();
+
+        return $this->successResponse($persona, 201);
     }
 
     /**
@@ -110,6 +124,10 @@ class PersonaController extends Controller
         }
 
         $model->update($validator->validated());
+
+        // Limpiar caché al actualizar
+        $this->limpiarCachePersonas();
+
         return $this->successResponse($model->fresh());
     }
 
@@ -128,6 +146,10 @@ class PersonaController extends Controller
         $model = Persona::find($persona);
         if (!$model) return $this->errorResponse('Persona no encontrada.', 404);
         $model->update(['validado' => true]);
+
+        // Limpiar caché al validar
+        $this->limpiarCachePersonas();
+
         return $this->successResponse($model->fresh());
     }
 
@@ -146,6 +168,17 @@ class PersonaController extends Controller
         $model = Persona::find($persona);
         if (!$model) return $this->errorResponse('Persona no encontrada.', 404);
         $model->update(['activo' => false]);
+
+        // Limpiar caché al eliminar
+        $this->limpiarCachePersonas();
+
         return $this->successResponse(['message' => 'Persona desactivada exitosamente.']);
+    }
+
+    private function limpiarCachePersonas(): void
+    {
+        Cache::forget('personas_cv_ciego_all');
+        Cache::forget('personas_cv_ciego_1');
+        Cache::forget('personas_cv_ciego_0');
     }
 }
