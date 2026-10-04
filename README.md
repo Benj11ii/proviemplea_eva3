@@ -1,10 +1,8 @@
-# ProviEmplea API — Plataforma de Búsqueda Inversa
+# ProviEmplea API — Plataforma de Intermediación Laboral y Búsqueda Inversa
 
-> **Repositorio oficial:** [https://github.com/Benj11ii/proviemplea_eva3](https://github.com/Benj11ii/proviemplea_eva3)
-
-**Proyecto de Vinculación con el Medio (VcM)**  
-**Asignatura:** Desarrollo Backend (IF201IINF) — Unidad 3  
-**Instituto Profesional:** San Sebastián
+> **Iniciativa de Modernización Tecnológica y Vinculación Municipal**  
+> Desarrollado para el Departamento de Empleo — **Municipalidad de Providencia, Santiago de Chile**.  
+> Arquitectura orientada a la no discriminación laboral mediante el estándar de **Curriculum Ciego**.
 
 API REST robusta construida en **Laravel 11 (PHP 8.4)** y dockerizada bajo Nginx y MySQL 8.0, diseñada para el Departamento de Empleo de la Municipalidad de Providencia. Implementa el modelo de **búsqueda inversa de talento local** garantizando la no discriminación mediante el estándar de **Curriculum Ciego** (los perfiles públicos se exponen de forma anónima sin datos sensibles).
 
